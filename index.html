@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS — Adwait Mulay</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#080c12;--panel:#0d1117;--card:#161b22;--border:#21262d;
+  --accent:#00d4ff;--accent2:#534AB7;--green:#1D9E75;--red:#f85149;
+  --text:#e6edf3;--muted:#8b949e;--font:'Segoe UI',system-ui,sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--panel);flex-shrink:0;}
+.nav-logo{display:flex;align-items:center;gap:10px;}
+.nav-icon{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#534AB7);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;box-shadow:0 0 12px #00d4ff44;}
+.nav-title{font-size:16px;font-weight:700;letter-spacing:0.05em;}
+.nav-title span{color:var(--accent);}
+.nav-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.nav-right{display:flex;gap:8px;}
+.nav-btn{padding:5px 12px;border-radius:6px;font-size:12px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;}
+.nav-btn:hover{color:var(--text);border-color:var(--accent);}
+
+/* LAYOUT */
+.main{display:flex;flex:1;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-section{padding:12px 14px 6px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:13px;color:var(--muted);cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;}
+.sidebar-item:hover{background:var(--card);color:var(--text);}
+.sidebar-item.active{background:var(--card);color:var(--accent);border-left-color:var(--accent);}
+.sidebar-item .si{font-size:15px;width:20px;text-align:center;}
+.sidebar-bottom{margin-top:auto;padding:14px;}
+.made-by{font-size:11px;color:var(--muted);text-align:center;}
+.made-by a{color:var(--accent);text-decoration:none;}
+
+/* CHAT AREA */
+.chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.messages{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px;}
+.messages::-webkit-scrollbar{width:4px;}
+.messages::-webkit-scrollbar-track{background:transparent;}
+.messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* MESSAGES */
+.msg{display:flex;gap:10px;max-width:75%;animation:fadeIn 0.2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.msg-avatar{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+.msg.jarvis .msg-avatar{background:linear-gradient(135deg,#00d4ff22,#534AB722);border:1px solid var(--accent);color:var(--accent);}
+.msg.user .msg-avatar{background:linear-gradient(135deg,#534AB7,#00d4ff);color:#fff;}
+.msg-bubble{padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.6;}
+.msg.jarvis .msg-bubble{background:var(--card);border:1px solid var(--border);border-top-left-radius:4px;color:var(--text);}
+.msg.user .msg-bubble{background:linear-gradient(135deg,#534AB7,#3d3590);border-top-right-radius:4px;color:#fff;}
+.msg-time{font-size:10px;color:var(--muted);margin-top:4px;text-align:right;}
+
+/* QUICK ACTIONS */
+.quick-actions{padding:10px 24px;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--border);}
+.qa{padding:6px 12px;border-radius:20px;font-size:12px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.qa:hover{border-color:var(--accent);color:var(--accent);}
+
+/* INPUT BAR */
+.input-bar{padding:14px 24px;border-top:1px solid var(--border);background:var(--panel);display:flex;gap:10px;align-items:center;flex-shrink:0;}
+.input-wrap{flex:1;display:flex;align-items:center;background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:0 14px;transition:border-color 0.15s;}
+.input-wrap:focus-within{border-color:var(--accent);}
+#user-input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:14px;padding:12px 0;font-family:var(--font);}
+#user-input::placeholder{color:var(--muted);}
+.mic-btn{width:36px;height:36px;border-radius:50%;border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.mic-btn:hover{color:var(--accent);}
+.mic-btn.listening{color:var(--red);animation:pulse 1s infinite;}
+.send-btn{width:42px;height:42px;border-radius:10px;border:none;background:linear-gradient(135deg,#00d4ff,#534AB7);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity 0.15s;}
+.send-btn:hover{opacity:0.85;}
+
+/* PANELS */
+.panel{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.panel.active{display:flex;}
+.panel-header{padding:18px 24px 12px;border-bottom:1px solid var(--border);}
+.panel-header h2{font-size:16px;font-weight:600;margin-bottom:4px;}
+.panel-header p{font-size:12px;color:var(--muted);}
+.panel-body{flex:1;overflow-y:auto;padding:20px 24px;}
+
+/* CALCULATOR PANEL */
+.calc-display{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:right;margin-bottom:16px;}
+.calc-expr-p{font-size:12px;color:var(--muted);min-height:16px;font-family:monospace;}
+.calc-num-p{font-size:40px;font-weight:300;color:var(--text);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.calc-grid-p{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.cpb{padding:16px 0;font-size:18px;border:none;border-radius:10px;cursor:pointer;transition:all 0.1s;font-family:var(--font);}
+.cpb:active{transform:scale(0.94);}
+.cpf{background:var(--card);color:var(--muted);border:1px solid var(--border);}
+.cpo{background:#534AB7;color:#fff;}
+.cpo.lit{background:#e8e6ff;color:#534AB7;}
+.cpn{background:#161b22;color:var(--text);border:1px solid var(--border);}
+.cpe{background:var(--green);color:#fff;}
+
+/* NEWS PANEL */
+.news-grid{display:grid;gap:12px;}
+.news-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:border-color 0.15s;}
+.news-card:hover{border-color:var(--accent);}
+.news-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent);margin-bottom:6px;}
+.news-title{font-size:14px;font-weight:600;margin-bottom:6px;line-height:1.4;}
+.news-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+.news-meta{font-size:11px;color:var(--muted);margin-top:8px;}
+
+/* SKILLS PANEL */
+.skill-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.skill-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.skill-title{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--accent);}
+.skill-bar{margin-bottom:8px;}
+.skill-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px;}
+.bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+
+@media(max-width:700px){.sidebar{display:none;}.msg{max-width:90%;}.quick-actions{display:none;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-icon">J</div>
+    <div>
+      <div class="nav-title"><span>JARVIS</span></div>
+      <div style="font-size:10px;color:var(--muted);">by Adwait Mulay</div>
+    </div>
+  </div>
+  <div class="nav-status"><div class="status-dot"></div>System Online</div>
+  <div class="nav-right">
+    <button class="nav-btn" onclick="toggleVoice()" id="voice-toggle">🔊 Voice On</button>
+    <a href="https://github.com/adwaitmulay" target="_blank"><button class="nav-btn">GitHub</button></a>
+  </div>
+</nav>
+
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">Navigation</div>
+    <div class="sidebar-item active" onclick="showPanel('chat')" id="tab-chat"><span class="si">💬</span> Chat</div>
+    <div class="sidebar-item" onclick="showPanel('calc')" id="tab-calc"><span class="si">🧮</span> Calculator</div>
+    <div class="sidebar-item" onclick="showPanel('news')" id="tab-news"><span class="si">📰</span> News</div>
+    <div class="sidebar-item" onclick="showPanel('skills')" id="tab-skills"><span class="si">⚡</span> About Me</div>
+    <div class="sidebar-section">Quick Commands</div>
+    <div class="sidebar-item" onclick="sendMsg('What time is it?')"><span class="si">🕐</span> Time</div>
+    <div class="sidebar-item" onclick="sendMsg('Tell me a joke')"><span class="si">😄</span> Joke</div>
+    <div class="sidebar-item" onclick="sendMsg('What can you do?')"><span class="si">❓</span> Help</div>
+    <div class="sidebar-bottom">
+      <div class="made-by">Built by <a href="https://github.com/adwaitmulay">Adwait Mulay</a><br>First-year CS @ DES Pune</div>
+    </div>
+  </div>
+
+  <!-- CHAT PANEL -->
+  <div class="panel active" id="panel-chat" style="flex-direction:column;">
+    <div class="messages" id="messages"></div>
+    <div class="quick-actions">
+      <div class="qa" onclick="sendMsg('What time is it?')">🕐 Time</div>
+      <div class="qa" onclick="sendMsg('What is today\'s date?')">📅 Date</div>
+      <div class="qa" onclick="sendMsg('Tell me a joke')">😄 Joke</div>
+      <div class="qa" onclick="sendMsg('calculate 25 * 4')">🧮 Calculate</div>
+      <div class="qa" onclick="sendMsg('Show me the news')">📰 News</div>
+      <div class="qa" onclick="sendMsg('Who are you?')">🤖 About</div>
+      <div class="qa" onclick="sendMsg('What can you do?')">❓ Help</div>
+    </div>
+    <div class="input-bar">
+      <div class="input-wrap">
+        <input id="user-input" placeholder="Ask JARVIS anything..." onkeydown="if(event.key==='Enter')sendMsg()"/>
+        <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Voice input">🎤</button>
+      </div>
+      <button class="send-btn" onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+
+  <!-- CALCULATOR PANEL -->
+  <div class="panel" id="panel-calc">
+    <div class="panel-header"><h2>🧮 Calculator</h2><p>Full arithmetic calculator</p></div>
+    <div class="panel-body">
+      <div class="calc-display">
+        <div class="calc-expr-p" id="p-expr"></div>
+        <div class="calc-num-p" id="p-display">0</div>
+      </div>
+      <div class="calc-grid-p">
+        <button class="cpb cpf" onclick="pc('clear')" style="grid-column:span 2">AC</button>
+        <button class="cpb cpf" onclick="pc('sign')">+/−</button>
+        <button class="cpb cpo" id="po-/" onclick="pc('op','/')">÷</button>
+        <button class="cpb cpn" onclick="pc('num','7')">7</button>
+        <button class="cpb cpn" onclick="pc('num','8')">8</button>
+        <button class="cpb cpn" onclick="pc('num','9')">9</button>
+        <button class="cpb cpo" id="po-*" onclick="pc('op','*')">×</button>
+        <button class="cpb cpn" onclick="pc('num','4')">4</button>
+        <button class="cpb cpn" onclick="pc('num','5')">5</button>
+        <button class="cpb cpn" onclick="pc('num','6')">6</button>
+        <button class="cpb cpo" id="po--" onclick="pc('op','-')">−</button>
+        <button class="cpb cpn" onclick="pc('num','1')">1</button>
+        <button class="cpb cpn" onclick="pc('num','2')">2</button>
+        <button class="cpb cpn" onclick="pc('num','3')">3</button>
+        <button class="cpb cpo" id="po-+" onclick="pc('op','+')">+</button>
+        <button class="cpb cpn" onclick="pc('num','0')" style="grid-column:span 2;text-align:left;padding-left:24px;">0</button>
+        <button class="cpb cpn" onclick="pc('dot')">.</button>
+        <button class="cpb cpe" onclick="pc('equals')">=</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEWS PANEL -->
+  <div class="panel" id="panel-news">
+    <div class="panel-header"><h2>📰 News Feed</h2><p>Latest tech & CS news</p></div>
+    <div class="panel-body">
+      <div class="news-grid" id="news-grid"></div>
+    </div>
+  </div>
+
+  <!-- SKILLS/ABOUT PANEL -->
+  <div class="panel" id="panel-skills">
+    <div class="panel-header"><h2>⚡ About Me</h2><p>Adwait Mulay — First-year CS @ DES Pune</p></div>
+    <div class="panel-body">
+      <div class="skill-grid">
+        <div class="skill-card">
+          <div class="skill-title">Languages</div>
+          <div class="skill-bar"><div class="skill-label"><span>C++</span><span>85%</span></div><div class="bar"><div class="bar-fill" style="width:85%"></div></div></div>
+          <div class="skill-bar"><div class="skill-label"><span>C</span><span>80%</span></div><div class="bar"><div class="bar-fill" style="width:80%"></div></div></div>
+          <div class="skill-bar"><div class="skill-label"><span>HTML/CSS</span><span>75%</span></div><div class="bar"><div class="bar-fill" style="width:75%"></div></div></div>
+          <div class="skill-bar"><div class="skill-label"><span>Python</span><span>40%</span></div><div class="bar"><div class="bar-fill" style="width:40%"></div></div></div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-title">Tools</div>
+          <div class="skill-bar"><div class="skill-label"><span>Git & GitHub</span><span>80%</span></div><div class="bar"><div class="bar-fill" style="width:80%"></div></div></div>
+          <div class="skill-bar"><div class="skill-label"><span>VS Code</span><span>90%</span></div><div class="bar"><div class="bar-fill" style="width:90%"></div></div></div>
+          <div class="skill-bar"><div class="skill-label"><span>Figma</span><span>65%</span></div><div class="bar"><div class="bar-fill" style="width:65%"></div></div></div>
+          <div class="skill-bar"><div class="skill-label"><span>Canva</span><span>85%</span></div><div class="bar"><div class="bar-fill" style="width:85%"></div></div></div>
+        </div>
+        <div class="skill-card" style="grid-column:span 2">
+          <div class="skill-title">Projects</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+            <a href="https://adwaitmulay.github.io/calculator" target="_blank" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;text-decoration:none;color:var(--text);display:block;">
+              <div style="font-size:12px;color:var(--accent);margin-bottom:4px;">C++ Project</div>
+              <div style="font-size:13px;font-weight:600;">Simple Calculator</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;">5 operations · ~80 lines · Edge case handling</div>
+            </a>
+            <a href="https://adwaitmulay.github.io/number-guessing-game" target="_blank" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;text-decoration:none;color:var(--text);display:block;">
+              <div style="font-size:12px;color:var(--green);margin-bottom:4px;">C++ Project</div>
+              <div style="font-size:13px;font-weight:600;">Number Guessing Game</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;">2 difficulty levels · rand() · Input validation</div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── VOICE ────────────────────────────────────────────────
+let voiceOn=true, listening=false;
+const synth=window.speechSynthesis;
+
+function speak(text){
+  if(!voiceOn)return;
+  synth.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=1;u.pitch=0.9;u.volume=1;
+  synth.speak(u);
+}
+
+function toggleVoice(){
+  voiceOn=!voiceOn;
+  document.getElementById('voice-toggle').textContent=voiceOn?'🔊 Voice On':'🔇 Voice Off';
+}
+
+// Speech recognition
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recog=null;
+if(SpeechRecognition){
+  recog=new SpeechRecognition();
+  recog.continuous=false;recog.lang='en-US';
+  recog.onresult=e=>{
+    document.getElementById('user-input').value=e.results[0][0].transcript;
+    stopListening();sendMsg();
+  };
+  recog.onerror=()=>stopListening();
+  recog.onend=()=>stopListening();
+}
+
+function toggleMic(){
+  if(!recog){addMsg('jarvis','Sorry, your browser does not support voice input. Try Chrome!');return;}
+  if(listening){stopListening();}else{startListening();}
+}
+function startListening(){listening=true;recog.start();document.getElementById('mic-btn').classList.add('listening');document.getElementById('user-input').placeholder='Listening...';}
+function stopListening(){listening=false;if(recog)recog.stop();document.getElementById('mic-btn').classList.remove('listening');document.getElementById('user-input').placeholder='Ask JARVIS anything...';}
+
+// ── CHAT ─────────────────────────────────────────────────
+function getTime(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+function getDate(){return new Date().toLocaleDateString([],{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
+
+function addMsg(who,text){
+  const msgs=document.getElementById('messages');
+  const d=document.createElement('div');
+  d.className=`msg ${who}`;
+  const avatar=who==='jarvis'?'J':'AM';
+  d.innerHTML=`<div class="msg-avatar">${avatar}</div><div><div class="msg-bubble">${text}</div><div class="msg-time">${getTime()}</div></div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function sendMsg(preset){
+  const input=document.getElementById('user-input');
+  const text=(preset||input.value).trim();
+  if(!text)return;
+  input.value='';
+  addMsg('user',text);
+  showPanel('chat');
+  setTimeout(()=>{
+    const reply=getReply(text.toLowerCase());
+    addMsg('jarvis',reply);
+    speak(reply.replace(/<[^>]*>/g,''));
+  },400);
+}
+
+// ── REPLIES ───────────────────────────────────────────────
+const jokes=[
+  "Why do programmers prefer dark mode? Because light attracts bugs!",
+  "How many programmers does it take to change a light bulb? None — that's a hardware problem.",
+  "Why did the developer go broke? Because he used up all his cache.",
+  "A SQL query walks into a bar, walks up to two tables and asks... Can I join you?",
+  "Why do Java developers wear glasses? Because they don't C#!",
+  "What's a computer's favourite snack? Microchips!"
+];
+const facts=[
+  "The first computer bug was an actual bug — a moth found in a Harvard Mark II computer in 1947.",
+  "The word 'algorithm' comes from the name of Persian mathematician Al-Khwarizmi.",
+  "The first programming language was FORTRAN, created in 1957 by IBM.",
+  "There are over 700 programming languages in existence today.",
+  "The average keyboard has about 100 keys — C++ uses most of them!",
+  "Git was created by Linus Torvalds in just 10 days in 2005."
+];
+
+function getReply(q){
+  // Greetings
+  if(/^(hi|hello|hey|yo|sup|howdy)/.test(q)) return "Hello! I'm JARVIS, your personal AI assistant built by Adwait Mulay. How can I help you today?";
+  if(/how are you|how r u/.test(q)) return "All systems operating at full capacity! Ready to assist. What do you need?";
+  if(/good (morning|afternoon|evening|night)/.test(q)) return `Good ${q.match(/morning|afternoon|evening|night/)[0]}! Systems are online and ready. What can I do for you?`;
+
+  // Identity
+  if(/who are you|what are you|your name/.test(q)) return "I'm <b>JARVIS</b> — a web-based AI assistant built from scratch by <b>Adwait Mulay</b>, a first-year CS student at DES Pune. I use HTML, CSS & JavaScript with no external APIs.";
+  if(/who (made|built|created) you|who is your (creator|developer)/.test(q)) return "I was built by <b>Adwait Mulay</b> — a first-year CS Engineering student at DES College, Pune. Check out his work at <a href='https://github.com/adwaitmulay' target='_blank' style='color:var(--accent)'>github.com/adwaitmulay</a>";
+
+  // Time & Date
+  if(/time/.test(q)) return `The current time is <b>${getTime()}</b>.`;
+  if(/date|today|day/.test(q)) return `Today is <b>${getDate()}</b>.`;
+
+  // Calculator
+  if(/calculat|compute|math|what is|solve/.test(q)){
+    const m=q.match(/(\d+\.?\d*)\s*([\+\-\*\/x×÷])\s*(\d+\.?\d*)/);
+    if(m){
+      const a=parseFloat(m[1]),op=m[2],b=parseFloat(m[3]);
+      let r;
+      if(op==='+'||op==='plus')r=a+b;
+      else if(op==='-'||op==='minus')r=a-b;
+      else if(op==='*'||op==='x'||op==='×'||op==='times')r=a*b;
+      else if(op==='/'||op==='÷'||op==='divided'){if(b===0)return"Cannot divide by zero!";r=a/b;}
+      if(r!==undefined)return`<b>${a} ${op} ${b} = ${parseFloat(r.toPrecision(10))}</b> ✓`;
+    }
+    return "I can solve expressions like <b>25 * 4</b> or <b>100 / 5</b>. Or use the 🧮 Calculator tab for full functionality!";
+  }
+
+  // News
+  if(/news|headline|latest|current event/.test(q)){
+    showPanel('news');
+    return "Opening the News feed for you! I've switched to the 📰 News tab with the latest tech headlines.";
+  }
+
+  // Jokes
+  if(/joke|funny|laugh|humor/.test(q)) return jokes[Math.floor(Math.random()*jokes.length)];
+
+  // Facts
+  if(/fact|trivia|did you know/.test(q)) return facts[Math.floor(Math.random()*facts.length)];
+
+  // Weather
+  if(/weather|temperature|forecast/.test(q)) return "I don't have live weather access, but you can check <a href='https://weather.com' target='_blank' style='color:var(--accent)'>weather.com</a> or just ask Google — they have better satellites than me!";
+
+  // Projects
+  if(/project|portfolio|work|built/.test(q)) return "Adwait has built: 1) <a href='https://adwaitmulay.github.io/calculator' target='_blank' style='color:var(--accent)'>Simple Calculator</a> — C++, 5 operations. 2) <a href='https://adwaitmulay.github.io/number-guessing-game' target='_blank' style='color:var(--green)'>Number Guessing Game</a> — C++, 2 difficulty levels. 3) Me — JARVIS! Check the ⚡ About tab for more.";
+
+  // Skills
+  if(/skill|language|know|learn|study/.test(q)) return "Adwait knows <b>C, C++, HTML5, CSS3</b> and is currently learning <b>Python</b>. Tools: Git, GitHub, VS Code, Figma, Canva. Check the ⚡ About tab for full details!";
+
+  // Help
+  if(/help|what can you do|command|feature/.test(q)) return "I can help with: ⏰ <b>Time & Date</b> · 🧮 <b>Calculations</b> (try '25 * 4') · 😄 <b>Jokes</b> · 📰 <b>News</b> · ⚡ <b>About Adwait</b> · 🎤 <b>Voice input</b> (mic button) · 🔊 <b>Voice output</b> (toggle top right). Just ask!";
+
+  // Thanks
+  if(/thank|thanks|appreciate/.test(q)) return "You're welcome! Always here to help. Is there anything else you'd like to know?";
+
+  // Bye
+  if(/bye|goodbye|see you|exit/.test(q)) return "Goodbye! JARVIS systems standing by. Come back anytime!";
+
+  // Default
+  const defaults=[
+    "Interesting question! I'm still learning. Try asking me about the time, a calculation, a joke, or Adwait's projects!",
+    "I don't have a specific answer for that yet, but I'm pre-programmed with C++ logic — ask me to calculate something!",
+    "That's beyond my current programming. Try: time, date, joke, calculate, news, or projects!"
+  ];
+  return defaults[Math.floor(Math.random()*defaults.length)];
+}
+
+// ── PANELS ────────────────────────────────────────────────
+function showPanel(name){
+  ['chat','calc','news','skills'].forEach(p=>{
+    document.getElementById('panel-'+p).classList.toggle('active',p===name);
+    const t=document.getElementById('tab-'+p);
+    if(t)t.classList.toggle('active',p===name);
+  });
+  if(name==='news')loadNews();
+}
+
+// ── NEWS ─────────────────────────────────────────────────
+const NEWS=[
+  {tag:'AI',title:'OpenAI releases new reasoning model surpassing human benchmarks',desc:'The latest model achieves record scores on math and coding evaluations, pushing the frontier of AI capabilities.',meta:'Tech News · Today'},
+  {tag:'C++',title:'C++26 standard finalised with major performance improvements',desc:'The new standard brings improved compile times, better memory safety features and simplified syntax for modern development.',meta:'Programming · This week'},
+  {tag:'GitHub',title:'GitHub Copilot now supports voice-to-code in VS Code',desc:'Developers can now dictate code in natural language, with Copilot converting speech to working code in real time.',meta:'Dev Tools · Today'},
+  {tag:'Internship',title:'Tech internship applications for 2026 open at major companies',desc:'Google, Microsoft, Amazon and startups are accepting applications for summer internships. Strong C++ and Python skills preferred.',meta:'Careers · This week'},
+  {tag:'CS Education',title:'DES College Pune ranks in top engineering colleges of Maharashtra',desc:'The institution continues to produce strong engineering graduates with high placement rates in software companies.',meta:'Education · This month'},
+  {tag:'Open Source',title:'Linux kernel hits 30 million lines of code milestone',desc:'The open-source operating system kernel continues to grow with contributions from thousands of developers worldwide.',meta:'Open Source · This week'},
+];
+
+function loadNews(){
+  const g=document.getElementById('news-grid');
+  g.innerHTML=NEWS.map(n=>`
+    <div class="news-card">
+      <div class="news-tag">${n.tag}</div>
+      <div class="news-title">${n.title}</div>
+      <div class="news-desc">${n.desc}</div>
+      <div class="news-meta">${n.meta}</div>
+    </div>`).join('');
+}
+
+// ── CALCULATOR PANEL ─────────────────────────────────────
+let pc_cur='0',pc_prev=null,pc_op=null,pc_fresh=false;
+function pc_fmt(n){let s=parseFloat(n.toPrecision(10)).toString();return s.length>12?parseFloat(n.toPrecision(6)).toString():s;}
+function pc_sym(o){return o==='/'?'÷':o==='*'?'×':o==='-'?'−':'+';}
+function pc_compute(a,b,o){if(o==='/'&&b===0)return'Error';let r;if(o==='+')r=a+b;else if(o==='-')r=a-b;else if(o==='*')r=a*b;else r=a/b;return pc_fmt(r);}
+function pc_clr(){['+','-','*','/'].forEach(o=>{const b=document.getElementById('po-'+o);if(b)b.classList.remove('lit');});}
+function pc(type,val){
+  if(type==='num'){if(pc_cur==='Error'){pc_cur=val;pc_fresh=false;}else if(pc_fresh||pc_cur==='0'){pc_cur=val;pc_fresh=false;}else if(pc_cur.length<12)pc_cur+=val;pc_clr();}
+  else if(type==='dot'){if(pc_fresh){pc_cur='0.';pc_fresh=false;}else if(!pc_cur.includes('.'))pc_cur+='.';pc_clr();}
+  else if(type==='sign'){if(pc_cur!=='0'&&pc_cur!=='Error')pc_cur=(parseFloat(pc_cur)*-1).toString();}
+  else if(type==='op'){
+    pc_clr();
+    if(pc_op&&!pc_fresh){let r=pc_compute(parseFloat(pc_prev),parseFloat(pc_cur),pc_op);if(r==='Error'){pc_cur='Error';pc_op=null;pc_prev=null;document.getElementById('p-expr').textContent='';document.getElementById('p-display').textContent=pc_cur;return;}pc_prev=r.toString();pc_cur=r.toString();}else{pc_prev=pc_cur;}
+    pc_op=val;pc_fresh=true;document.getElementById('p-expr').textContent=pc_prev+' '+pc_sym(val);
+    const ob=document.getElementById('po-'+val);if(ob)ob.classList.add('lit');
+  }
+  else if(type==='equals'){
+    if(pc_op&&pc_prev!==null){pc_clr();let r=pc_compute(parseFloat(pc_prev),parseFloat(pc_cur),pc_op);document.getElementById('p-expr').textContent=pc_prev+' '+pc_sym(pc_op)+' '+pc_cur+' =';pc_cur=r==='Error'?'Error':r.toString();pc_op=null;pc_prev=null;pc_fresh=true;}
+  }
+  else if(type==='clear'){pc_cur='0';pc_prev=null;pc_op=null;pc_fresh=false;document.getElementById('p-expr').textContent='';pc_clr();}
+  document.getElementById('p-display').textContent=pc_cur;
+}
+
+// ── INIT ─────────────────────────────────────────────────
+window.onload=()=>{
+  setTimeout(()=>{
+    addMsg('jarvis','Hello! I\'m <b>JARVIS</b> — your personal AI assistant built by Adwait Mulay. I can help with calculations, tell you the time, share news, crack jokes and more. Try typing or click the 🎤 mic to speak!');
+    speak("Hello! I'm JARVIS, your personal AI assistant. How can I help you today?");
+  },600);
+};
+</script>
+</body>
+</html>
